@@ -1,4 +1,6 @@
-﻿class Program
+﻿using BatalhaDeMonstros.Game; 
+using BatalhaDeMonstros.Monsters;
+class Program
 {
     static void Main(string[] args)
     {
