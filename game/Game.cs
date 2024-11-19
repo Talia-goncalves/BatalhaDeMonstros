@@ -2,21 +2,32 @@ using BatalhaDeMonstros.Actions;
 using BatalhaDeMonstros.GameManagement;
 using BatalhaDeMonstros.Monsters;
 using BatalhaDeMonstros.Observers;
+using BatalhaDeMonstros.Memento;
 
-namespace BatalhaDeMonstros.Game
+namespace BatalhaDeMonstros.BattleGames
 {
-    public class Game
+    public class BattleGame
     {
         private readonly List<Monster> _monsters = new();
         private readonly bool _isPvE;
         private readonly AIPlayer.AIPlayer _aiPlayer = new();
         private readonly HealthObserver _healthObserver = new();
-
         private readonly GameManager _gameManager = new();
+        private readonly GameSaver _gameSaver = new();
+        
+        // Variável para controlar a exibição da mensagem de salvar
+        private bool firstTurn = true;
 
-        public Game(bool isPvE)
+        public BattleGame(bool isPvE)
         {
             _isPvE = isPvE;
+        }
+
+        // Novo construtor para carregar o estado do jogo
+        public BattleGame(GameMemento memento)
+        {
+            _isPvE = memento.IsPvE;
+            _monsters = memento.Monsters;
         }
 
         public void AddMonster(Monster monster) => _monsters.Add(monster);
@@ -29,7 +40,7 @@ namespace BatalhaDeMonstros.Game
             var playerMonster = ChooseMonster("Jogador");
             _monsters.Add(playerMonster);
 
-            // Escolha do monstro para a IA
+            // Escolha do monstro para a IA ou segundo jogador
             Monster opponentMonster;
             if (_isPvE)
             {
@@ -42,8 +53,23 @@ namespace BatalhaDeMonstros.Game
             }
             _monsters.Add(opponentMonster);
 
+            // Loop do jogo
             while (playerMonster.Health > 0 && opponentMonster.Health > 0)
             {
+                // Mostrar a mensagem de 'sair' apenas na primeira rodada
+                if (firstTurn)
+                {
+                    Console.WriteLine("Digite 'sair' para salvar e sair, ou pressione Enter para continuar.");
+                    firstTurn = false; // Desabilitar a exibição para as rodadas subsequentes
+                }
+
+                if (Console.ReadLine()?.ToLower() == "sair")
+                {
+                    SaveGameState();
+                    Console.WriteLine("Jogo salvo e saindo...");
+                    return;
+                }
+
                 ExecuteTurn(playerMonster, opponentMonster);
 
                 if (opponentMonster.Health > 0)
@@ -64,6 +90,12 @@ namespace BatalhaDeMonstros.Game
 
             _gameManager.Score += playerMonster.Health > 0 ? 10 : 0;
             Console.WriteLine(playerMonster.Health > 0 ? "Jogador vence!" : "Oponente vence!");
+        }
+
+        private void SaveGameState()
+        {
+            var memento = new GameMemento(_monsters, _isPvE); // Passando o valor de _isPvE para o memento
+            _gameSaver.SaveGame(memento);
         }
 
         private Monster ChooseMonster(string player)
@@ -118,4 +150,5 @@ namespace BatalhaDeMonstros.Game
             Console.WriteLine($"{defender.GetType().Name} tem {defender.Health} de vida restante.");
         }
     }
+
 }
