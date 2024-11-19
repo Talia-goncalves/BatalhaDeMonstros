@@ -1,4 +1,3 @@
-GameSaver.cs:
 using System.Text.Json;
 using BatalhaDeMonstros.Memento;
 
