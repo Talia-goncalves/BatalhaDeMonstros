@@ -1,5 +1,4 @@
-﻿using System;
-using BatalhaDeMonstros.BattleGames;
+﻿using BatalhaDeMonstros.BattleGames;
 using BatalhaDeMonstros.Memento;
 
 namespace BatalhaDeMonstros
